@@ -1,0 +1,21 @@
+{
+  "name": "boardsurf",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173",
+    "server": "node server/main.mjs"
+  },
+  "dependencies": {
+    "@pelevesque/matrix-transformers": "^0.0.5",
+    "rxjs": "^7.5.7",
+    "uuid": "^9.0.0",
+    "vue": "^3.2.38",
+    "ws": "^8.9.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^3.0.3",
+    "vite": "^3.0.9"
+  }
+}
