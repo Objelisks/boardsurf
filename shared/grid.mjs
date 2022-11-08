@@ -98,6 +98,7 @@ const isSameTier = (valueA, valueB) => {
 
 // 0, 1, 2 => 12, 45
 const teamSpace = (space, team) => {
+  if(space === 0) return space
   return space + (team === TEAMS.local ? 0 : 3)
 }
 
@@ -111,7 +112,7 @@ const getPlayedSpaces = (play) => {
   const grid = rotateGrid(play.card.grid, play.turns)
   return grid.flatMap((row, y) =>
     row.flatMap((space, x) =>
-      ({x: x+play.x, y: y+play.y, value: teamSpace(space, play.team), special: play.special})))
+      ({x: x+play.x, y: y+play.y, value: teamSpace(space, play.team || TEAMS.local), special: play.special})))
 }
 
 // converts a play to a grid

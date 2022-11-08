@@ -3,7 +3,7 @@ import PlayerHand from '../components/PlayerHand.vue'
 import { computed, ref } from 'vue'
 import { filter } from 'rxjs'
 import Grid, { BIG_GRID_SIZE } from '../components/Grid.vue'
-import { countFilled, combineGrids, playToGrid, createGrid, placeGrid, placementProblemTest, rotateGrid } from '../../shared/grid.mjs'
+import { countFilled, combineGrids, playToGrid, createGrid, placeGrid, placementProblemTest, rotateGrid, TEAMS } from '../../shared/grid.mjs'
 import { useDraggable } from '../composables/useDraggable.js'
 import { sendAction, ACTIONS, connection } from '../state/connection.js'
 import { wait } from '../../shared/util.js'
@@ -33,13 +33,12 @@ const selecting = computed(() => state.value === STATES.selecting)
 const placing = computed(() => state.value === STATES.placing)
 
 // position/rotation of the preview ghost when placing a card
-const { mouseDown: ghostMouseDown, x: ghostDraggableX, y: ghostDraggableY } = useDraggable()
+const { mouseDown: ghostMouseDown, x: ghostDraggableX, y: ghostDraggableY } = useDraggable(placing)
 const ghostX = computed(() => ghostDraggableX.value)
 const ghostY = computed(() => ghostDraggableY.value)
 const placingRotation = ref(0)
 
 const transitionState = (newState) => {
-  console.log('state transition', newState)
   state.value = newState
 }
 
@@ -47,12 +46,14 @@ const transitionState = (newState) => {
 connection.pipe(filter(msg => msg.type === 'results')).subscribe((msg) => {
   transitionState(STATES.showingResults)
 
+  msg.play.team = TEAMS.opponent
+
   // figure out which card goes first
   const mySpaces = countFilled(myPlay.value.card.grid)
   const theirSpaces = countFilled(msg.play.card.grid)
 
-  const myPlayGrid = playToGrid(myPlay.value, board.value[0].length, board.value.length)
-  const theirPlayGrid = rotateGrid(playToGrid(msg.play, board.value[0].length, board.value.length), 2)
+  const myPlayGrid = playToGrid(myPlay.value, board.value[0].length, board.value.length, TEAMS.local)
+  const theirPlayGrid = rotateGrid(playToGrid(msg.play, board.value[0].length, board.value.length, TEAMS.opponent), 2)
 
   let animation = wait(1000)
 
@@ -79,7 +80,11 @@ connection.pipe(filter(msg => msg.type === 'results')).subscribe((msg) => {
     })
   }
   animation.then(wait(1000)).then(() => {
+    // reset to start of turn
     selectedCard.value = null
+    myPlay.value = null
+    specialEnabled.value = false
+    passingEnabled.value = false
     transitionState(STATES.selecting)
   })
 })
@@ -106,7 +111,7 @@ const ghostPositionInSpaces = computed(() => {
   return selectedCard.value !== null ? {x: griddedX, y: griddedY} : {x: 0, y: 0}
 })
 
-// checjs
+// checks that the ghost card is in a placeable location
 const isPlacementValid = computed(() => {
   const test = placementProblemTest(
     board.value,
@@ -191,7 +196,7 @@ const confirmPlacement = () => {
         <Grid :grid="placedGrid" size="15px" :placing="true" :invalid="!isPlacementValid"/>
       </div>
     </div>
-      <span v-if="placedGrid">drag to move</span>
+      <span v-if="placing">drag to move</span>
 
     <div class="short-buttons" v-if="placing">
       <button @click="rotateRight">↻</button>

@@ -89,18 +89,7 @@ wss.on('connection', (ws, req) => {
             [otherPlayer(game, id)]: game.otherCard
           }
 
-          // make a copy of the grid
-          // play the card on the copy
-
-
-          // TODO: convert card + x + y into play (grid space) here
-          // TODO: rotate their placement 180
-
-          // todo: validate (only rotate firstplayer's card)
-          // check for overlap
-          // game.board = combineCards(game.board, cardA, cardB)
-
-          // combine cards and board state
+          // todo: validate, track game progress on server
 
           // send out results
           // sends each player the other player's play rotated 180

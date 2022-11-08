@@ -1,15 +1,17 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 
-export const useDraggable = () => {
+export const useDraggable = (activeRef) => {
   const x = ref(0)
   const y = ref(0)
   const moving = ref(false)
 
   const mouseDown = (event) => {
+    if(!activeRef.value) return
     moving.value = true
   }
 
   const mouseMove = (event) => {
+    if(!activeRef.value) return
     if(moving.value) {
       event.preventDefault()
       x.value += event.movementX
